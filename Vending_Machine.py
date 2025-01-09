@@ -17,6 +17,9 @@ def display():
     print("\nWelcome to the Machine!") # Greetings
     print("Please select a category.") # Asks user for category (Foods or Drinks)
     print("\nCategory:")
+
+    selected_item = None # Store the selected item
+
     category = input("Foods or Drinks: ").capitalize() # User input
     # If user choose Foods category
     if category == "Foods":
@@ -29,8 +32,8 @@ def display():
         while True: # Loop to ensure user enters correct item code
             code = input("\nEnter the item code: ").upper() # User enter code of item
             if code in foods: # If entered code is in foods dictionary
-                item, price, quantity = foods[code] # Retrieve item details
-                print(f"\nYou have chosen {code}: {item} - {price:.2f} AED.") # Confirms user input
+                selected_item = foods[code] # Retrieve item details
+                print(f"\nYou have chosen {code}: {selected_item[0]} - {selected_item[1]:.2f} AED.") # Confirms user input
                 break # Exit the loop
             else:
                 print("\nInvalid code, please try again.")  # If invalid item code is entered, user will try again
@@ -46,8 +49,8 @@ def display():
         while True: # Loop to ensure user enters correct item code
             code = input("\nEnter the item code: ").upper() # User enter code of item
             if code in drinks: # If entered code is in drinks dictionary
-                item, price, quantity = drinks[code] # Retrieve item details
-                print(f"\nYou have chosen {code}: {item} - {price:.2f} AED.") # Confirms user input
+                selected_item = drinks[code] # Retrieve item details
+                print(f"\nYou have chosen {code}: {selected_item[0]} - {selected_item[1]:.2f} AED.") # Confirms user input
                 break # Exit the loop
             else:
                 print("\nInvalid code, please try again.")  # If invalid item code is entered, user will try again
@@ -55,4 +58,53 @@ def display():
     else: 
         print("\nInvalid category. Please start again.")  # If the category is invalid
 
-display()
+    return selected_item # Return the selected item
+
+#Payment from the user. Ensure the user pays enough and return change
+def payment(price):
+    total_paid = 0 # Track the amount inserted
+
+    while True:
+        try: # Ask for payment
+            amount_entered = float(input(f"Please instert {price - total_paid:.2f} AED for the item: "))
+            total_paid += amount_entered  # Add the entered amount to the total paid
+
+            # If the total payment is enough
+            if total_paid >= price:
+                change = total_paid - price
+                print(f"Change returned: {change:.2f}AED")
+                return change # Return change
+
+            # If the user hasn't paid enough, shows how much more is needed
+            else:
+                short = price - total_paid
+                print(f"Insufficient amount. Please instert {short:.2f} AED more.")
+
+        except ValueError:
+            print("Invalid amount, please insert the specific amount.")
+
+# Dispense product after payment
+def dispense(item):
+    print(f"\nDispensing {item[0]}...") # Dispensing the item
+    print(f"Enjoy your {item[0]}!\n")
+
+# Main
+def machine():
+    item = display() # Display the menu and get selected item
+
+    if item: # If a valid item was selected
+        code, price, quantity = item # Unpack the selected item
+        print(f"\nYou selected: {code} price: {price:.2f} AED. {quantity}")
+        change = payment(price) # Process payment and get change
+
+        dispense(item) # Dispense the item
+        print(f"Thank you for your purchase! You recieved a change of {change:.2f}AED.")
+
+        more = input("\nWould you like to buy something else? (Yes or No): ").capitalize()
+        if more == "Yes":
+            machine()  # Restart the process
+        else:
+            print("Thank you for using the Vending Machine. Goodbye!")  # End message
+
+# Run the machine function
+machine()
