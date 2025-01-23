@@ -15,9 +15,9 @@ drinks = {
 
 # Displays menu and takes user input
 def display():
-    print("\nWelcome to the Machine!") # Greetings
-    print("Please select a category.") # Asks user for category (Foods or Drinks)
-    print("\nCategory:")
+    print("\n\033[1m\033[4mWelcome to the Machine!\033[0m") # Greetings
+    print("\n******************** \nPlease select a category.") # Asks user for category (Foods or Drinks)
+    print("\n\033[1m\033[4mCategory:\033[0m")
 
     selected_item = None # Store the selected item
 
@@ -26,10 +26,10 @@ def display():
 
         # If user choose Foods category
         if category == "Foods":
-            print("\nMenu for Foods:") # Display items for foods
+            print("\n********************\nMenu for Foods:") # Display items for foods
             for code, (item, price, quantity) in foods.items():
                 # Iterating through the foods dictionary and displaying each item
-                print(f"{code}: {item} - {price:.2f} AED. (Available: {quantity})")
+                print(f"\033[96m{code}:\033[0m {item} - {price:.2f} AED. \033[94m(Available: \033[1m{quantity})\033[0m")
 
             print("\nChoose your order in the given menu.") # Asks user for order
             while True: # Loop to ensure user enters correct item code
@@ -49,7 +49,7 @@ def display():
             print("\nMenu for Drinks:")
             for code, (item, price, quantity) in drinks.items():
                 # Iterating through the foods dictionary and displaying each item
-                print(f"{code}: {item} - {price:.2f} AED (Available: {quantity})")
+                print(f"{code}: {item} - {price:.2f} AED. \033[96m(Available: {quantity}\033[0m)")
 
             print("\nChoose your order in the given menu.")
             while True: # Loop to ensure user enters correct item code
@@ -76,30 +76,30 @@ def payment(price, quantity):
 
     while True:
         try: # Ask for payment
-            amount_entered = float(input(f"Please instert {total_price - total_paid:.2f} AED for the item: "))
+            amount_entered = float(input(f"********************\nPlease instert\033[91m {total_price - total_paid:.2f} AED\033[0m for the item: "))
             total_paid += amount_entered  # Add the entered amount to the total paid
 
             # If the total payment is enough
             if total_paid >= total_price:
                 change = total_paid - total_price
                 if change > 0:
-                    print(f"Change returned: {change:.2f}AED")
+                    print(f"Change returned: \033[36m{change:.2f}AED\033[0m")
                 elif change == 0:
-                    print("No change, exact amount recieved.")
+                    print("\033[36mNo change, exact amount recieved. \033[0m")
                 return change # Return change
 
             # Shows how much more is needed
             else:
                 short = total_price - total_paid
-                print(f"Insufficient amount. Please instert {short:.2f} AED more.")
+                print(f"Insufficient amount. Please instert \033[91m {short:.2f} \033[0m AED more.")
 
         except ValueError:
-            print("Invalid amount, please insert the specific amount.")
+            print("\033[91m Invalid amount, please insert the specific amount. \033[0m")
 
 # Dispense product after payment
 def dispense(item):
-    print(f"\nDispensing {item[1]}...") # Dispensing the item
-    print(f"Enjoy your {item[1]}!\n")
+    print(f"\n******************** \nDispensing \033[92m {item[1]}...\033[0m") # Dispensing the item
+    print(f"Enjoy your \033[92m {item[1]}!\033[0m\n********************")
 
 #Stocks update
 def update_stock(category, code, quantity_ordered):
@@ -117,11 +117,11 @@ def machine():
 
         if item:  # If a valid item was selected
             code, name, price, quantity = item  # Unpack the selected item
-            print(f"\nYou selected: {name}, price: {price:.2f} AED. (Available: {quantity})")
+            print(f"\n******************** \nYou selected: \033[92m{name}\033[0m | price: {price:.2f} AED. \033[94m(Available: {quantity})\033[0m")
 
             while True:
                 try:
-                    quantity_ordered = int(input(f"How many {name} would you like to purchase? (Available: {quantity}): "))
+                    quantity_ordered = int(input(f"How many {name} would you like to purchase? Enter amount: "))
                     if 0 < quantity_ordered <= quantity:
                         payment(price, quantity_ordered)  # Process payment
                         update_stock("Foods" if code in foods else "Drinks", code, quantity_ordered)  # Update stock
