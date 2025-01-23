@@ -35,8 +35,11 @@ def display():
             while True: # Loop to ensure user enters correct item code
                 code = input("\nEnter the item code: ").upper() # User enter code of item
                 if code in foods: # If entered code is in foods dictionary
-                    selected_item = foods[code] # Retrieve item details
-                    break
+                    if foods[code][2] > 0:  # Check if the item is in stock
+                        selected_item = (code, *foods[code]) # Retrieve item details
+                        break
+                    else:
+                        print("\nSorry, the item is not available/out of stock.")
                 else:
                     print("\nInvalid code, please try again.")  # If invalid item code is entered, user will try again
             break
@@ -52,8 +55,11 @@ def display():
             while True: # Loop to ensure user enters correct item code
                 code = input("\nEnter the item code: ").upper() # User enter code of item
                 if code in drinks: # If entered code is in drinks dictionary
-                    selected_item = drinks[code] # Retrieve item details
-                    break
+                    if drinks[code][2] > 0:  # Check if the item is in stock
+                        selected_item = (code, *drinks[code]) # Retrieve item details
+                        break
+                    else:
+                        print("\nSorry, the item is not available/out of stock.")
                 else:
                     print("\nInvalid code, please try again.")  # If invalid item code is entered, user will try again
             break
@@ -82,7 +88,7 @@ def payment(price, quantity):
                     print("No change, exact amount recieved.")
                 return change # Return change
 
-            # If the user hasn't paid enough, shows how much more is needed
+            # Shows how much more is needed
             else:
                 short = total_price - total_paid
                 print(f"Insufficient amount. Please instert {short:.2f} AED more.")
@@ -92,43 +98,44 @@ def payment(price, quantity):
 
 # Dispense product after payment
 def dispense(item):
-    print(f"\nDispensing {item[0]}...") # Dispensing the item
-    print(f"Enjoy your {item[0]}!\n")
+    print(f"\nDispensing {item[1]}...") # Dispensing the item
+    print(f"Enjoy your {item[1]}!\n")
+
+#Stocks update
+def update_stock(category, code, quantity_ordered):
+    if category == "Foods":
+        item, price, quantity = foods[code]
+        foods[code] = (item, price, quantity - quantity_ordered)
+    elif category == "Drinks":
+        item, price, quantity = drinks[code]
+        drinks[code] = (item, price, quantity - quantity_ordered)
 
 # Main
 def machine():
-    item = display() # Display the menu and get selected item
+    while True:
+        item = display()  # Display the menu and get selected item
 
-    if item: # If a valid item was selected
-        code, price, quantity = item # Unpack the selected item
-        print(f"\nYou selected: {code} price: {price:.2f} AED. (Availability: {quantity})")
+        if item:  # If a valid item was selected
+            code, name, price, quantity = item  # Unpack the selected item
+            print(f"\nYou selected: {name}, price: {price:.2f} AED. (Available: {quantity})")
 
-        quantity_ordered = int(input(f"How many {item[0]} would you like to purchase? (Available: {quantity}): "))
-        
-        if quantity_ordered > 0 and quantity_ordered <= quantity:
-            change = payment(price, quantity_ordered) # Process payment and get change
-
-            dispense(item) # Dispense the item
-            print(f"Thank you for your purchase!")
+            while True:
+                try:
+                    quantity_ordered = int(input(f"How many {name} would you like to purchase? (Available: {quantity}): "))
+                    if 0 < quantity_ordered <= quantity:
+                        payment(price, quantity_ordered)  # Process payment
+                        update_stock("Foods" if code in foods else "Drinks", code, quantity_ordered)  # Update stock
+                        dispense(item)  # Dispense the item
+                        break
+                    else:
+                        print("Invalid quantity, please try again.")
+                except ValueError:
+                    print("Invalid input. Please enter a number.")
 
             more = input("\nWould you like to buy something else? (Yes or No): ").capitalize()
-            if more == "Yes":
-                machine()  # Restart the process
+            if more != "Yes":
+                print("Thank you for using the Vending Machine. Goodbye!")
+                break
             
-            else:
-                print("Thank you for using the Vending Machine. Goodbye!")  # End message
-        elif quantity_ordered < quantity:
-            print("Out of stock, would you like to buy another item?")
-            another_item = input("Yes or No: ")
-
-            if another_item == "Yes":
-                display()
-            elif another_item == "No":
-                print("We apologize for not having stocks of you wanted item.")
-
-        else:
-            print("Invalid quantity, Please try again.")
-            
-
 # Run the machine function
 machine()
